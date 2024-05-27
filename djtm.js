@@ -273,11 +273,16 @@ const questions = [
   },
   // 更多题目，确保总数达到50道
 ];
-function displayQuestions() {
-  const container = document.getElementById('quizContainer');
-  container.innerHTML = '';  // 清空先前的内容
 
-  questions.forEach((question, index) => {
+let currentQuestionIndex = 0;
+let answers = [];
+
+function displayQuestion() {
+  if (currentQuestionIndex < questions.length) {
+    const question = questions[currentQuestionIndex];
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+
     const questionDiv = document.createElement('div');
     questionDiv.className = 'question';
     questionDiv.innerHTML = `<p>${question.question}</p>`;
@@ -285,23 +290,56 @@ function displayQuestions() {
     const optionsDiv = document.createElement('div');
     optionsDiv.className = 'options';
 
-    question.options.forEach(option => {
+    question.options.forEach((option, index) => {
       const optionLabel = document.createElement('label');
       const optionInput = document.createElement('input');
       optionInput.type = question.type === 'multi' ? 'checkbox' : 'radio';
-      optionInput.name = `question${index}`;
+      optionInput.name = `question${currentQuestionIndex}`;
       optionInput.value = option;
+      optionInput.id = `option${index}`;
+
       optionLabel.appendChild(optionInput);
       optionLabel.append(document.createTextNode(option));
       optionsDiv.appendChild(optionLabel);
       optionsDiv.appendChild(document.createElement('br'));
     });
 
+    const submitButton = document.createElement('button');
+    submitButton.textContent = '提交答案';
+    submitButton.onclick = submitAnswer;
+
     questionDiv.appendChild(optionsDiv);
+    questionDiv.appendChild(submitButton);
     container.appendChild(questionDiv);
+  } else {
+    displayResults();
+  }
+}
+
+function submitAnswer() {
+  const inputs = document.querySelectorAll(`input[name="question${currentQuestionIndex}"]:checked`);
+  let userAnswers = Array.from(inputs).map(input => input.value);
+  answers.push({ question: questions[currentQuestionIndex].question, userAnswers, correct: questions[currentQuestionIndex].correct });
+  
+  currentQuestionIndex++;
+  if (currentQuestionIndex < 10) {
+    displayQuestion();
+  } else {
+    displayResults();
+  }
+}
+
+function displayResults() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '<h2>测试结果</h2>';
+  
+  answers.forEach((answer, index) => {
+    const resultDiv = document.createElement('div');
+    resultDiv.innerHTML = `<p>问题 ${index + 1}: ${answer.question}</p>
+                           <p>您的答案: ${answer.userAnswers.join(', ')}</p>
+                           <p>正确答案: ${answer.correct.join(', ')}</p>`;
+    container.appendChild(resultDiv);
   });
 }
 
-// 在页面加载完成后显示题目
-document.addEventListener('DOMContentLoaded', displayQuestions);
-
+document.addEventListener('DOMContentLoaded', displayQuestion);
