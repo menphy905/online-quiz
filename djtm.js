@@ -273,5 +273,35 @@ const questions = [
   },
   // 更多题目，确保总数达到50道
 ];
+function displayQuestions() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';  // 清空先前的内容
 
+  questions.forEach((question, index) => {
+    const questionDiv = document.createElement('div');
+    questionDiv.className = 'question';
+    questionDiv.innerHTML = `<p>${question.question}</p>`;
+
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'options';
+
+    question.options.forEach(option => {
+      const optionLabel = document.createElement('label');
+      const optionInput = document.createElement('input');
+      optionInput.type = question.type === 'multi' ? 'checkbox' : 'radio';
+      optionInput.name = `question${index}`;
+      optionInput.value = option;
+      optionLabel.appendChild(optionInput);
+      optionLabel.append(document.createTextNode(option));
+      optionsDiv.appendChild(optionLabel);
+      optionsDiv.appendChild(document.createElement('br'));
+    });
+
+    questionDiv.appendChild(optionsDiv);
+    container.appendChild(questionDiv);
+  });
+}
+
+// 在页面加载完成后显示题目
+document.addEventListener('DOMContentLoaded', displayQuestions);
 
