@@ -148,7 +148,7 @@ const questions = [
     options: ["道路自信", "理论自信", "制度自信", "文化自信"],
     correct: ['A', 'B', 'C', 'D'],
     type: 'multi'
-  }
+  },
 
   {
     question: "什么是'一个核心'所指的内容？",
