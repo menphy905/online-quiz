@@ -6,66 +6,15 @@
 <style>
   body { font-family: Arial, sans-serif; }
   .question { margin-top: 20px; }
-  .options { margin-left: 20px; }
-  button { margin-top: 20px; }
+  .options label { display: block; }
+  .options input[type="radio"], .options input[type="checkbox"] {
+    margin-right: 10px;
+  }
 </style>
-<script src="djtm.js"></script>
 </head>
 <body>
 <h1>党建知识在线测试</h1>
 <div id="quizContainer"></div>
-<button onclick="loadNextQuestions()">下一组题目</button>
-<div id="result"></div>
-
-<script>
-let currentStart = 0;
-const questionPerPage = 10;
-let displayQuestions = [];
-
-function loadQuestions() {
-  if (!questions || questions.length === 0) {
-    document.getElementById('quizContainer').innerHTML = "题目加载失败或题库为空。";
-    return;
-  }
-  displayQuestions = questions.slice(currentStart, currentStart + questionPerPage);
-  display();
-}
-
-function display() {
-  const container = document.getElementById('quizContainer');
-  container.innerHTML = '';
-  displayQuestions.forEach((q, index) => {
-    const questionDiv = document.createElement('div');
-    questionDiv.className = 'question';
-    questionDiv.innerHTML = `<p>${q.question}</p>`;
-    const optionsDiv = document.createElement('div');
-    optionsDiv.className = 'options';
-    q.options.forEach((option, i) => {
-      const label = document.createElement('label');
-      const input = document.createElement('input');
-      input.type = q.type === 'multi' ? 'checkbox' : 'radio';
-      input.name = 'question' + index;
-      input.value = option;
-      label.appendChild(input);
-      label.append(option);
-      optionsDiv.appendChild(label);
-      optionsDiv.appendChild(document.createElement('br'));
-    });
-    questionDiv.appendChild(optionsDiv);
-    container.appendChild(questionDiv);
-  });
-}
-
-function loadNextQuestions() {
-  if (currentStart + questionPerPage < questions.length) {
-    currentStart += questionPerPage;
-    loadQuestions();
-  } else {
-    document.getElementById('result').innerText = "已完成所有题目的测试。";
-  }
-}
-
-window.onload = loadQuestions;
-</script>
+<script src="djtm.js"></script>
 </body>
 </html>
