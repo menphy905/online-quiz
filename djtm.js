@@ -273,38 +273,66 @@ const questions = [
   },
   // 更多题目，确保总数达到50道
 ];
+let currentQuestionIndex = 0;  // 当前题目的索引
+let answers = [];  // 存储用户的答案
+
 function displayQuestion() {
   const container = document.getElementById('quizContainer');
-  if (!container) {
-    console.error("Quiz container not found!");
-    return;
-  }
-
   container.innerHTML = '';  // 清空先前的内容
 
-  // 以第一个问题为例显示
-  const question = questions[0];  // 这应改为循环或其他逻辑以显示所有问题
-  const questionDiv = document.createElement('div');
-  questionDiv.className = 'question';
-  questionDiv.innerHTML = `<p>${question.question}</p>`;
+  if(currentQuestionIndex < questions.length) {
+    const question = questions[currentQuestionIndex];  // 获取当前题目
+    const questionDiv = document.createElement('div');
+    questionDiv.className = 'question';
+    questionDiv.innerHTML = `<p>${question.question}</p>`;
 
-  const optionsDiv = document.createElement('div');
-  optionsDiv.className = 'options';
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'options';
 
-  question.options.forEach((option, index) => {
-    const optionLabel = document.createElement('label');
-    const optionInput = document.createElement('input');
-    optionInput.type = question.type === 'multi' ? 'checkbox' : 'radio';
-    optionInput.name = `question`;
-    optionInput.value = option;
-    optionLabel.appendChild(optionInput);
-    optionLabel.append(document.createTextNode(option));
-    optionsDiv.appendChild(optionLabel);
-    optionsDiv.appendChild(document.createElement('br'));
+    question.options.forEach((option, index) => {
+      const optionLabel = document.createElement('label');
+      const optionInput = document.createElement('input');
+      optionInput.type = question.type === 'multi' ? 'checkbox' : 'radio';
+      optionInput.name = `question${currentQuestionIndex}`;
+      optionInput.value = option;
+      optionLabel.appendChild(optionInput);
+      optionLabel.append(document.createTextNode(option));
+      optionsDiv.appendChild(optionLabel);
+      optionsDiv.appendChild(document.createElement('br'));
+    });
+
+    const submitButton = document.createElement('button');
+    submitButton.textContent = '提交答案';
+    submitButton.onclick = submitAnswer;  // 绑定提交答案的函数
+
+    questionDiv.appendChild(optionsDiv);
+    questionDiv.appendChild(submitButton);
+    container.appendChild(questionDiv);
+  } else {
+    displayResults();  // 所有题目答完后显示结果
+  }
+}
+
+function submitAnswer() {
+  const inputs = document.querySelectorAll(`input[name="question${currentQuestionIndex}"]:checked`);
+  let userAnswers = Array.from(inputs).map(input => input.value);
+  answers.push({ question: questions[currentQuestionIndex].question, userAnswers, correct: questions[currentQuestionIndex].correct });
+
+  currentQuestionIndex++;  // 移动到下一题
+  displayQuestion();  // 显示下一题
+}
+
+function displayResults() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '<h2>测试结果</h2>';
+
+  answers.forEach((answer, index) => {
+    const resultDiv = document.createElement('div');
+    resultDiv.innerHTML = `<p>问题 ${index + 1}: ${answer.question}</p>
+                           <p>您的答案: ${answer.userAnswers.join(', ')}</p>
+                           <p>正确答案: ${answer.correct.join(', ')}</p>`;
+    container.appendChild(resultDiv);
   });
-
-  questionDiv.appendChild(optionsDiv);
-  container.appendChild(questionDiv);
 }
 
 document.addEventListener('DOMContentLoaded', displayQuestion);
