@@ -9,87 +9,63 @@
   .options { margin-left: 20px; }
   button { margin-top: 20px; }
 </style>
+<script src="djtm.js"></script>
 </head>
 <body>
 <h1>党建知识在线测试</h1>
-<form id="quizForm"></form>
-<button onclick="submitAnswers()">提交答案</button>
+<div id="quizContainer"></div>
+<button onclick="loadNextQuestions()">下一组题目</button>
 <div id="result"></div>
 
 <script>
-// 示例题目和答案，可以添加更多题目
-const allQuestions = [
-  {
-    question: "党的最高理想和最终目标是什么？",
-    options: ["实现社会主义现代化", "实现共产主义", "推动科技进步和创新", "建设和谐社会"],
-    correct: ['B'],
-    type: 'single'
-  },
-  {
-    question: "党的基本理论包括哪些内容？",
-    options: ["马克思列宁主义", "习近平新时代中国特色社会主义思想", "三个代表重要思想", "科学发展观"],
-    correct: ['A', 'B', 'C', 'D'],
-    type: 'multi'
-  },
-  // 添加更多题目
-];
+let currentStart = 0;
+const questionPerPage = 10;
+let displayQuestions = [];
 
-function displayQuestions() {
-  const form = document.getElementById('quizForm');
-  form.innerHTML = ""; // 清除之前的内容
-  allQuestions.forEach((question, index) => {
-    const questionElement = document.createElement("div");
-    questionElement.className = "question";
-    questionElement.innerHTML = `<p>${index + 1}. ${question.question} (${question.type === 'multi' ? '多选题' : '单选题'})</p>`;
+function loadQuestions() {
+  if (!questions || questions.length === 0) {
+    document.getElementById('quizContainer').innerHTML = "题目加载失败或题库为空。";
+    return;
+  }
+  displayQuestions = questions.slice(currentStart, currentStart + questionPerPage);
+  display();
+}
 
-    const optionsElement = document.createElement("div");
-    optionsElement.className = "options";
-    question.options.forEach((option, i) => {
-      const optionInput = document.createElement("input");
-      optionInput.type = question.type === 'multi' ? 'checkbox' : 'radio';
-      optionInput.name = `question${index}`;
-      optionInput.value = option;
-      const label = document.createElement("label");
-      label.textContent = option;
-      label.prepend(optionInput);
-      optionsElement.appendChild(label);
-      optionsElement.appendChild(document.createElement("br"));
+function display() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  displayQuestions.forEach((q, index) => {
+    const questionDiv = document.createElement('div');
+    questionDiv.className = 'question';
+    questionDiv.innerHTML = `<p>${q.question}</p>`;
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'options';
+    q.options.forEach((option, i) => {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = q.type === 'multi' ? 'checkbox' : 'radio';
+      input.name = 'question' + index;
+      input.value = option;
+      label.appendChild(input);
+      label.append(option);
+      optionsDiv.appendChild(label);
+      optionsDiv.appendChild(document.createElement('br'));
     });
-
-    questionElement.appendChild(optionsElement);
-    form.appendChild(questionElement);
+    questionDiv.appendChild(optionsDiv);
+    container.appendChild(questionDiv);
   });
 }
 
-function submitAnswers() {
-  const form = document.getElementById('quizForm');
-  let score = 0;
-  let resultHtml = "<h3>Results:</h3>";
-
-  allQuestions.forEach((question, index) => {
-    const inputs = Array.from(form.querySelectorAll(`input[name="question${index}"]:checked`));
-    const userAnswers = inputs.map(input => input.value);
-    const isCorrect = question.type === 'multi' ?
-      arraysEqual(userAnswers.sort(), question.correct.sort()) :
-      userAnswers[0] === question.correct[0];
-
-    if (isCorrect) {
-      score += question.type === 'multi' ? 30 : 20;
-      resultHtml += `<p>Question ${index + 1}: Correct</p>`;
-    } else {
-      resultHtml += `<p>Question ${index + 1}: Incorrect. Correct answers are: ${question.correct.join(", ")}</p>`;
-    }
-  });
-
-  document.getElementById('result').innerHTML = resultHtml + `<h4>Your total score: ${score}</h4>`;
+function loadNextQuestions() {
+  if (currentStart + questionPerPage < questions.length) {
+    currentStart += questionPerPage;
+    loadQuestions();
+  } else {
+    document.getElementById('result').innerText = "已完成所有题目的测试。";
+  }
 }
 
-function arraysEqual(a, b) {
-  return a.length === b.length && a.every((val, index) => val === b[index]);
-}
-
-// Initialize questions on page load
-window.onload = displayQuestions;
+window.onload = loadQuestions;
 </script>
 </body>
 </html>
