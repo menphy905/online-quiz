@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>党建知识在线测试</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  .question { margin-top: 20px; }
+  .options { margin-left: 20px; }
+</style>
+</head>
+<body>
+<h1>党建知识在线测试</h1>
+<form id="quizForm"></form>
+<button onclick="submitAnswers()">提交答案</button>
+<div id="result"></div>
+
+<script>
+// 所有可能的题目和答案
+const allQuestions = [
+  {
+    question: "党的最高理想和最终目标是什么？",
+    options: ["实现社会主义现代化", "实现共产主义", "推动科技进步和创新", "建设和谐社会"],
+    correct: ['B'],
+    type: 'single'
+  },
+  {
+    question: "党的基本理论包括哪些内容？",
+    options: ["马克思列宁主义", "习近平新时代中国特色社会主义思想", "三个代表重要思想", "科学发展观"],
+    correct: ['A', 'B', 'C', 'D'],
+    type: 'multi'
+  },
+  // 添加更多题目
+];
+
+// 随机选择题目
+function getRandomQuestions() {
+  const shuffled = allQuestions.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 50); // 假设你总共需要50道题，包括20单选和30多选
+}
+
+// 显示题目
+function displayQuestions() {
+  const questions = getRandomQuestions();
+  const form = document.getElementById('quizForm');
+  questions.forEach((question, index) => {
+    const type = question.type === 'multi' ? 'checkbox' : 'radio';
+    const name = `q${index}`;
+    const questionHTML = `
+      <div class="question">
+        <p>${index + 1}. ${question.question} (${question.type === 'multi' ? '多选' : '单选'})</p>
+        <div class="options">
+          ${question.options.map((option, i) =>
+            `<input type="${type}" name="${name}" value="${String.fromCharCode(65 + i)}"> ${String.fromCharCode(65 + i)}. ${option}<br>`).join('')}
+        </div>
+      </div>
+    `;
+    form.innerHTML += questionHTML;
+  });
+}
+
+// 提交答案
+function submitAnswers() {
+  const form = document.getElementById('quizForm');
+  const questions = getRandomQuestions(); // 重新获取问题保证一致性
+  let score = 0;
+  let resultsHtml = "<h3>结果:</h3>";
+
+  questions.forEach((question, index) => {
+    const userAnswers = Array.from(form.querySelectorAll(`input[name="q${index}"]:checked`)).map(input => input.value);
+    const correct = question.correct;
+    const questionScore = question.type === 'multi' ? 30 : 20; // 多选题30分，单选题20分
+
+    if (arraysEqual(userAnswers, correct)) {
+      score += questionScore;
+      resultsHtml += `<p>Question ${index + 1}: Correct (+${questionScore} points)</p>`;
+    } else {
+      resultsHtml += `<p>Question ${index + 1}: Incorrect. Correct answers are: ${correct.join(", ")}</p>`;
+    }
+  });
+
+  document.getElementById('result').innerHTML = resultsHtml + `<h4>Your total score: ${score}.</h4>`;
+}
+
+function arraysEqual(arr1, arr2) {
+  return arr1.length === arr2.length && arr1.every(value => arr2.includes(value));
+}
+
+// 初始化
+displayQuestions();
+</script>
+</body>
+</html>
