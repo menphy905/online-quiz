@@ -7,6 +7,7 @@
   body { font-family: Arial, sans-serif; }
   .question { margin-top: 20px; }
   .options { margin-left: 20px; }
+  button { margin-top: 20px; }
 </style>
 </head>
 <body>
@@ -16,7 +17,7 @@
 <div id="result"></div>
 
 <script>
-// 所有可能的题目和答案
+// 示例题目和答案，可以添加更多题目
 const allQuestions = [
   {
     question: "党的最高理想和最终目标是什么？",
@@ -33,61 +34,62 @@ const allQuestions = [
   // 添加更多题目
 ];
 
-// 随机选择题目
-function getRandomQuestions() {
-  const shuffled = allQuestions.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, 50); // 假设你总共需要50道题，包括20单选和30多选
-}
-
-// 显示题目
 function displayQuestions() {
-  const questions = getRandomQuestions();
   const form = document.getElementById('quizForm');
-  questions.forEach((question, index) => {
-    const type = question.type === 'multi' ? 'checkbox' : 'radio';
-    const name = `q${index}`;
-    const questionHTML = `
-      <div class="question">
-        <p>${index + 1}. ${question.question} (${question.type === 'multi' ? '多选' : '单选'})</p>
-        <div class="options">
-          ${question.options.map((option, i) =>
-            `<input type="${type}" name="${name}" value="${String.fromCharCode(65 + i)}"> ${String.fromCharCode(65 + i)}. ${option}<br>`).join('')}
-        </div>
-      </div>
-    `;
-    form.innerHTML += questionHTML;
+  form.innerHTML = ""; // 清除之前的内容
+  allQuestions.forEach((question, index) => {
+    const questionElement = document.createElement("div");
+    questionElement.className = "question";
+    questionElement.innerHTML = `<p>${index + 1}. ${question.question} (${question.type === 'multi' ? '多选题' : '单选题'})</p>`;
+
+    const optionsElement = document.createElement("div");
+    optionsElement.className = "options";
+    question.options.forEach((option, i) => {
+      const optionInput = document.createElement("input");
+      optionInput.type = question.type === 'multi' ? 'checkbox' : 'radio';
+      optionInput.name = `question${index}`;
+      optionInput.value = option;
+      const label = document.createElement("label");
+      label.textContent = option;
+      label.prepend(optionInput);
+      optionsElement.appendChild(label);
+      optionsElement.appendChild(document.createElement("br"));
+    });
+
+    questionElement.appendChild(optionsElement);
+    form.appendChild(questionElement);
   });
 }
 
-// 提交答案
 function submitAnswers() {
   const form = document.getElementById('quizForm');
-  const questions = getRandomQuestions(); // 重新获取问题保证一致性
   let score = 0;
-  let resultsHtml = "<h3>结果:</h3>";
+  let resultHtml = "<h3>Results:</h3>";
 
-  questions.forEach((question, index) => {
-    const userAnswers = Array.from(form.querySelectorAll(`input[name="q${index}"]:checked`)).map(input => input.value);
-    const correct = question.correct;
-    const questionScore = question.type === 'multi' ? 30 : 20; // 多选题30分，单选题20分
+  allQuestions.forEach((question, index) => {
+    const inputs = Array.from(form.querySelectorAll(`input[name="question${index}"]:checked`));
+    const userAnswers = inputs.map(input => input.value);
+    const isCorrect = question.type === 'multi' ?
+      arraysEqual(userAnswers.sort(), question.correct.sort()) :
+      userAnswers[0] === question.correct[0];
 
-    if (arraysEqual(userAnswers, correct)) {
-      score += questionScore;
-      resultsHtml += `<p>Question ${index + 1}: Correct (+${questionScore} points)</p>`;
+    if (isCorrect) {
+      score += question.type === 'multi' ? 30 : 20;
+      resultHtml += `<p>Question ${index + 1}: Correct</p>`;
     } else {
-      resultsHtml += `<p>Question ${index + 1}: Incorrect. Correct answers are: ${correct.join(", ")}</p>`;
+      resultHtml += `<p>Question ${index + 1}: Incorrect. Correct answers are: ${question.correct.join(", ")}</p>`;
     }
   });
 
-  document.getElementById('result').innerHTML = resultsHtml + `<h4>Your total score: ${score}.</h4>`;
+  document.getElementById('result').innerHTML = resultHtml + `<h4>Your total score: ${score}</h4>`;
 }
 
-function arraysEqual(arr1, arr2) {
-  return arr1.length === arr2.length && arr1.every(value => arr2.includes(value));
+function arraysEqual(a, b) {
+  return a.length === b.length && a.every((val, index) => val === b[index]);
 }
 
-// 初始化
-displayQuestions();
+// Initialize questions on page load
+window.onload = displayQuestions;
 </script>
 </body>
 </html>
